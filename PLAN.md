@@ -8,10 +8,10 @@ Status key: [x] done · [~] in progress · [ ] not started
 ## Steps
 
 - [x] 0. Schema + page list approved (2026-10-24)
-- [~] 1. Day-1 docs: PLAN.md, DECISIONS.md, CLAUDE.md, README, env example
-- [ ] 2. Scaffold: Next.js 15, Tailwind theme (crimson #9A1C1F), Supabase clients, middleware, /login, sidebar shell
-- [ ] 3. Database: `supabase/migrations` (tables, enums, RLS, triggers) + `supabase/seed.sql` (dummy data only)
-- [ ] 4. Board `/`: kanban by pipeline_stage, drag to move, flags (overdue task, overdue next action, revisit due), filters
+- [x] 1. Day-1 docs: PLAN.md, DECISIONS.md, CLAUDE.md, README, env example
+- [x] 2. Scaffold: Next.js 15, Tailwind theme (crimson #9A1C1F), Supabase clients, middleware, /login, sidebar shell
+- [x] 3. Database: `supabase/migrations` (tables, enums, RLS, triggers) + `supabase/seed.sql` (dummy data only)
+- [~] 4. Board `/`: kanban by pipeline_stage, drag to move, flags (overdue task, overdue next action, revisit due), filters
 - [ ] 5. `/company/[id]`: summary card, deals, notes timeline + paste transcript, decks, our take, people, tasks
 - [ ] 6. `/api/extract` (Gemini) and `/api/drive/upload` (Drive), both with non-blocking fallbacks
 - [ ] 7. `/review`, `/tasks`, `/add`
