@@ -19,9 +19,12 @@ Status key: [x] done · [~] in progress · [ ] not started
 - [x] 9. Manual setup handoff: SETUP.md
 - [x] 10. End-to-end test on a local Supabase-style stack (GoTrue + PostgREST + Postgres) in Next and in the Workers runtime
 
+- [x] 11. Table view toggle on the pipeline page
+
 ## Next (after you set it up)
 
-- [ ] Owner runs SETUP.md: Supabase project, 2 users, Cloudflare deploy
+- [x] Owner ran SETUP.md: Supabase project, Kushagra's user, Cloudflare deploy (live at deal-room.kush-sanwal.workers.dev)
+- [ ] Add Tanisha's account
 - [ ] Optional: Gemini key, Drive OAuth token
 - [ ] Untested until a real key exists: Gemini success path (failure path is tested)
 

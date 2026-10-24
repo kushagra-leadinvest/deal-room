@@ -12,7 +12,7 @@ type NavItem = { label: string; href: string; icon: React.ReactNode };
 
 const NAV: NavItem[] = [
   {
-    label: "Board",
+    label: "Pipeline",
     href: "/",
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -16,6 +16,9 @@ import { PIPELINE_STAGES, DEAL_STATUSES } from "@/lib/constants";
 import { isOnBoard, tagIndex, type BoardCard } from "@/lib/board";
 import type { PipelineStage, Profile, SectorTag } from "@/types";
 import Column from "./Column";
+import DealTable from "./DealTable";
+
+const VIEW_KEY = "dealroom.boardView";
 
 export default function Board({
   cards: initial,
@@ -38,6 +41,20 @@ export default function Board({
   const [query, setQuery] = useState("");
   const [showWatchlist, setShowWatchlist] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [view, setView] = useState<"board" | "table">("board");
+
+  // Remember the last view per browser.
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(VIEW_KEY) === "table") setView("table");
+    } catch {}
+  }, []);
+  function chooseView(v: "board" | "table") {
+    setView(v);
+    try {
+      localStorage.setItem(VIEW_KEY, v);
+    } catch {}
+  }
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -60,10 +77,12 @@ export default function Board({
     return true;
   });
 
-  async function handleDragEnd(e: DragEndEvent) {
-    const dealId = String(e.active.id);
+  function handleDragEnd(e: DragEndEvent) {
     const stage = e.over?.id as PipelineStage | undefined;
-    if (!stage) return;
+    if (stage) moveDeal(String(e.active.id), stage);
+  }
+
+  async function moveDeal(dealId: string, stage: PipelineStage) {
     const card = cards.find((c) => c.deal.id === dealId);
     if (!card) return;
     // Dropping a revisit-due or watchlist card into a column puts it back in the pipeline.
@@ -96,7 +115,22 @@ export default function Board({
     <div className="flex flex-col h-full">
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-2 px-4 md:px-6 py-3 border-b border-gray-200">
-        <h1 className="text-lg font-semibold mr-2">Board</h1>
+        <h1 className="text-lg font-semibold mr-1">Pipeline</h1>
+        <div className="inline-flex rounded-lg border border-gray-300 p-0.5 mr-2" role="tablist" aria-label="View">
+          {(["board", "table"] as const).map((v) => (
+            <button
+              key={v}
+              role="tab"
+              aria-selected={view === v}
+              onClick={() => chooseView(v)}
+              className={`px-2.5 py-1 text-xs font-medium rounded-md transition ${
+                view === v ? "bg-brand text-white" : "text-gray-600 hover:text-black"
+              }`}
+            >
+              {v === "board" ? "Board" : "Table"}
+            </button>
+          ))}
+        </div>
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -144,7 +178,9 @@ export default function Board({
 
       {error && <p className="mx-4 md:mx-6 mt-3 text-sm text-red-700 bg-red-50 rounded-lg px-3 py-2">{error}</p>}
 
-      {/* Columns */}
+      {view === "table" ? (
+        <DealTable cards={visible} ownerOf={ownerName} today={today} onStageChange={moveDeal} />
+      ) : (
       <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
         <div className="flex-1 overflow-x-auto">
           <div className="flex gap-3 p-4 md:px-6 min-w-max h-full">
@@ -161,6 +197,7 @@ export default function Board({
           </div>
         </div>
       </DndContext>
+      )}
     </div>
   );
 }

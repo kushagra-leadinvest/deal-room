@@ -63,3 +63,4 @@ White background, black text, crimson accent `#9A1C1F`. (lp-portal's Tailwind co
 
 - Duplicate check runs on website blur (same normalisation as the DB) and again via the unique index on insert.
 - Quick add always creates a deal in New, plus optional sector path and introducer.
+- Board page has a Board / Table toggle (added 2026-10-24 at owner's request). Same filters apply to both; the table sorts by any column header and lets you change pipeline stage inline. The chosen view is remembered per browser (localStorage).
