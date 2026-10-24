@@ -11,8 +11,8 @@ Status key: [x] done · [~] in progress · [ ] not started
 - [x] 1. Day-1 docs: PLAN.md, DECISIONS.md, CLAUDE.md, README, env example
 - [x] 2. Scaffold: Next.js 15, Tailwind theme (crimson #9A1C1F), Supabase clients, middleware, /login, sidebar shell
 - [x] 3. Database: `supabase/migrations` (tables, enums, RLS, triggers) + `supabase/seed.sql` (dummy data only)
-- [~] 4. Board `/`: kanban by pipeline_stage, drag to move, flags (overdue task, overdue next action, revisit due), filters
-- [ ] 5. `/company/[id]`: summary card, deals, notes timeline + paste transcript, decks, our take, people, tasks
+- [x] 4. Board `/`: kanban by pipeline_stage, drag to move, flags (overdue task, overdue next action, revisit due), filters
+- [~] 5. `/company/[id]`: summary card, deals, notes timeline + paste transcript, decks, our take, people, tasks
 - [ ] 6. `/api/extract` (Gemini) and `/api/drive/upload` (Drive), both with non-blocking fallbacks
 - [ ] 7. `/review`, `/tasks`, `/add`
 - [ ] 8. Cloudflare deploy config (OpenNext on Workers) + full build check

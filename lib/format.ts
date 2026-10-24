@@ -38,17 +38,22 @@ export function shortDate(isoDate: string | null | undefined): string {
   });
 }
 
-/** Today as YYYY-MM-DD in the browser/server's local time */
+// Dates are computed in the team's timezone, not the server's (Cloudflare runs in UTC).
+const TIME_ZONE = process.env.NEXT_PUBLIC_TIME_ZONE ?? "Asia/Kolkata";
+
+function ymd(d: Date): string {
+  // en-CA formats as YYYY-MM-DD
+  return d.toLocaleDateString("en-CA", { timeZone: TIME_ZONE });
+}
+
+/** Today as YYYY-MM-DD in the team's timezone */
 export function today(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  return ymd(new Date());
 }
 
 /** YYYY-MM-DD n days from today (negative for the past) */
 export function daysFromToday(n: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() + n);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  return ymd(new Date(Date.now() + n * 86_400_000));
 }
 
 /** Whole days since an ISO timestamp */

@@ -43,3 +43,10 @@ A deal shows on the board when `end_state = 'none'` and it is not parked (`revis
 ## Theme
 
 White background, black text, crimson accent `#9A1C1F`. (lp-portal's Tailwind config is still navy/gold; not copied.)
+
+## Board behaviour
+
+- Dropping a revisit-due or watchlist card into a column puts it back in the pipeline (end_state none, revisit cleared).
+- Flagged cards (revisit due, overdue task) sort to the top of their column, then by next action date.
+- "Overdue task" on a card counts open tasks past due on that deal, or on the company with no deal attached.
+- Dates ("today", overdue, revisit due) use `NEXT_PUBLIC_TIME_ZONE`, default Asia/Kolkata, because Cloudflare runs in UTC. Database triggers use Postgres `current_date` (UTC), which can differ by one day around midnight IST.
