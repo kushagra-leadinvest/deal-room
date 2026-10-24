@@ -50,3 +50,15 @@ White background, black text, crimson accent `#9A1C1F`. (lp-portal's Tailwind co
 - Flagged cards (revisit due, overdue task) sort to the top of their column, then by next action date.
 - "Overdue task" on a card counts open tasks past due on that deal, or on the company with no deal attached.
 - Dates ("today", overdue, revisit due) use `NEXT_PUBLIC_TIME_ZONE`, default Asia/Kolkata, because Cloudflare runs in UTC. Database triggers use Postgres `current_date` (UTC), which can differ by one day around midnight IST.
+
+## Weekly review rules
+
+- "Live" deals = end_state none, not parked, not invested. Stalled and missing-next-action lists only look at live deals.
+- Stalled = company `last_touched` 14+ days ago (`STALLED_DAYS` in lib/constants.ts).
+- Revisits this week = any deal with `revisit_date` on or before today + 7, including overdue ones.
+- Overdue tasks = open tasks due before today, for both users.
+
+## Quick add
+
+- Duplicate check runs on website blur (same normalisation as the DB) and again via the unique index on insert.
+- Quick add always creates a deal in New, plus optional sector path and introducer.
