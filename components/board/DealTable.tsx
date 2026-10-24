@@ -73,7 +73,7 @@ export default function DealTable({
             <th className="px-3 py-2 text-left font-medium">Investors</th>
             {header("owner", "Owner")}
             {header("status", "Status")}
-            {header("next", "Next action")}
+            {header("next", "Next action / pass reason")}
             {header("touched", "Last touched")}
           </tr>
         </thead>
@@ -82,8 +82,10 @@ export default function DealTable({
             const { deal, company } = c;
             const nextOverdue = !!deal.next_action_date && deal.next_action_date < today;
             const flagged = c.revisitDue || c.overdueTasks > 0;
+            const rejected = deal.end_state === "passed" || deal.end_state === "lost";
+            const quiet = !flagged && deal.end_state !== "none";
             return (
-              <tr key={deal.id} className={`align-top hover:bg-gray-50 ${flagged ? "bg-red-50/40" : ""}`}>
+              <tr key={deal.id} className={`align-top hover:bg-gray-50 ${flagged ? "bg-red-50/40" : ""} ${quiet ? "text-gray-500" : ""}`}>
                 <td className={`px-3 py-2 ${flagged ? "border-l-4 border-l-red-600" : ""}`}>
                   <Link href={`/company/${company.id}`} className="font-semibold hover:text-brand">
                     {company.name}
@@ -131,7 +133,14 @@ export default function DealTable({
                 <td className="px-3 py-2 text-xs whitespace-nowrap">{ownerOf(deal.owner)?.full_name ?? "—"}</td>
                 <td className="px-3 py-2 text-xs whitespace-nowrap">{labelOf(DEAL_STATUSES, deal.status)}</td>
                 <td className={`px-3 py-2 text-xs min-w-[12rem] ${nextOverdue ? "text-red-700" : ""}`}>
-                  {deal.next_action ? (
+                  {rejected ? (
+                    <span className="text-gray-600">
+                      <span className="font-medium">
+                        {deal.end_state === "lost" ? "Lost" : "Passed"} at {labelOf(PIPELINE_STAGES, deal.rejected_at_stage ?? deal.pipeline_stage)}
+                      </span>
+                      {deal.pass_reason ? `: ${deal.pass_reason}` : ""}
+                    </span>
+                  ) : deal.next_action ? (
                     <>
                       {deal.next_action}
                       {deal.next_action_date && (

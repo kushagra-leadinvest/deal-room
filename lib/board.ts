@@ -18,6 +18,30 @@ export function isOnBoard(deal: Deal, today: string) {
   return (deal.end_state === "none" && !isParked(deal)) || isRevisitDue(deal, today);
 }
 
+/** How long passed deals stay in the board's Passed column. */
+export const PASSED_COLUMN_DAYS = 90;
+
+export type BoardColumn = Deal["pipeline_stage"] | "passed" | "watchlist";
+
+/** Which board column a deal belongs in. Lost deals only appear when a revisit is due, in their stage column. */
+export function columnOf(deal: Deal): BoardColumn {
+  if (deal.end_state === "passed") return "passed";
+  if (deal.end_state === "watchlist") return "watchlist";
+  return deal.pipeline_stage;
+}
+
+/**
+ * Everything the pipeline page can show: the live board, passed deals from the
+ * last PASSED_COLUMN_DAYS (or with a revisit due), and the watchlist.
+ */
+export function isOnPipelinePage(deal: Deal, today: string, passedSince: string) {
+  if (deal.end_state === "passed") {
+    return isRevisitDue(deal, today) || !deal.closed_at || deal.closed_at.slice(0, 10) >= passedSince;
+  }
+  if (deal.end_state === "watchlist") return true;
+  return isOnBoard(deal, today);
+}
+
 /** Map of tag id → tag, and helpers to walk the hierarchy. */
 export function tagIndex(tags: SectorTag[]) {
   const byId = new Map(tags.map((t) => [t.id, t]));

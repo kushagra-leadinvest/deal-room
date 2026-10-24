@@ -5,7 +5,7 @@ One-time setup, about 30 minutes. Do the steps in order. Gemini and Drive (steps
 ## 1. Supabase (database + login)
 
 1. Go to supabase.com → **New project**. Name it `deal-room`, pick region **Mumbai (ap-south-1)**, set a database password (save it somewhere safe). Free plan.
-2. When it's ready, open **SQL Editor → New query**, paste the whole of `supabase/migrations/0001_schema.sql` from the repo, and click **Run**. It should say "Success. No rows returned".
+2. When it's ready, open **SQL Editor → New query**, paste the whole of `supabase/migrations/0001_schema.sql` from the repo, and click **Run**. It should say "Success. No rows returned". Then do the same for every later file in `supabase/migrations/`, in number order (0002, 0003, …).
 3. **Authentication → Sign In / Providers → Email**: keep Email enabled, turn **off** "Allow new users to sign up", and save.
 4. **Authentication → Users → Add user → Create new user**: enter your email and a password, tick **Auto Confirm User**. Repeat for your colleague. That's the only way accounts get created.
 5. Names: open **Table Editor → profiles** and set `full_name` and `initials` for both of you (they default to the part of the email before the @).

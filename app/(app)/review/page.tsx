@@ -9,6 +9,8 @@ import type { Company, Deal, Profile } from "@/types";
 
 export const dynamic = "force-dynamic";
 
+const RECENT_PASS_DAYS = 30;
+
 type Row = Deal & { company: Pick<Company, "id" | "name" | "last_touched"> };
 
 export default async function ReviewPage() {
@@ -36,6 +38,16 @@ export default async function ReviewPage() {
     .filter((d) => daysSince(d.company.last_touched) >= STALLED_DAYS)
     .sort((a, b) => a.company.last_touched.localeCompare(b.company.last_touched));
   const noNext = live.filter((d) => !d.next_action?.trim());
+  // Passed or lost in the last 30 days, newest first.
+  const passSince = daysFromToday(-RECENT_PASS_DAYS);
+  const passes = rows
+    .filter((d) => (d.end_state === "passed" || d.end_state === "lost") && d.closed_at && d.closed_at.slice(0, 10) >= passSince)
+    .sort((a, b) => b.closed_at!.localeCompare(a.closed_at!));
+  const passesByStage = PIPELINE_STAGES.map((s) => ({
+    label: s.label,
+    count: passes.filter((d) => (d.rejected_at_stage ?? d.pipeline_stage) === s.value).length,
+  })).filter((x) => x.count > 0);
+
   const revisits = rows
     .filter((d) => d.revisit_date && d.revisit_date <= weekOut)
     .sort((a, b) => a.revisit_date!.localeCompare(b.revisit_date!));
@@ -85,6 +97,50 @@ export default async function ReviewPage() {
           />
         </Section>
       </div>
+
+      <Section title={`Recent passes, last ${RECENT_PASS_DAYS} days (${passes.length})`}>
+        {passesByStage.length > 0 && (
+          <p className="text-xs text-gray-500 mb-2">
+            Rejected at: {passesByStage.map((x) => `${x.label} ${x.count}`).join(" · ")}
+          </p>
+        )}
+        {passes.length === 0 ? (
+          <p className="text-sm text-gray-400">No passes in the last {RECENT_PASS_DAYS} days.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-xs text-gray-500 text-left">
+                <tr>
+                  <th className="py-1.5 pr-3 font-medium">Company</th>
+                  <th className="py-1.5 pr-3 font-medium">Outcome</th>
+                  <th className="py-1.5 pr-3 font-medium">Rejected at</th>
+                  <th className="py-1.5 pr-3 font-medium">Reason</th>
+                  <th className="py-1.5 pr-3 font-medium">Date</th>
+                  <th className="py-1.5 font-medium">Owner</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {passes.map((d) => (
+                  <tr key={d.id} className="align-top">
+                    <td className="py-2 pr-3">
+                      <Link href={`/company/${d.company.id}`} className="font-medium hover:text-brand">{d.company.name}</Link>
+                      {d.stage && <span className="text-xs text-gray-500"> · {d.stage}</span>}
+                    </td>
+                    <td className="py-2 pr-3 text-xs">{d.end_state === "lost" ? "Lost" : "Passed"}</td>
+                    <td className="py-2 pr-3 text-xs font-medium whitespace-nowrap">
+                      {labelOf(PIPELINE_STAGES, d.rejected_at_stage ?? d.pipeline_stage)}
+                    </td>
+                    <td className="py-2 pr-3 text-xs text-gray-700">{d.pass_reason || <span className="text-gray-400 italic">No reason given</span>}</td>
+                    <td className="py-2 pr-3 text-xs text-gray-500 whitespace-nowrap">{formatDate(d.closed_at)}</td>
+                    <td className="py-2 text-xs text-gray-500">{profiles.find((p) => p.id === d.owner)?.initials}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Section>
+
       <p className="text-xs text-gray-400">
         {rows.filter((d) => isOnBoard(d, t)).length} deals on the board right now.
       </p>

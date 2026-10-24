@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -12,13 +12,14 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import { createClient } from "@/lib/supabase/client";
-import { PIPELINE_STAGES, DEAL_STATUSES } from "@/lib/constants";
-import { isOnBoard, tagIndex, type BoardCard } from "@/lib/board";
-import type { PipelineStage, Profile, SectorTag } from "@/types";
+import { PIPELINE_STAGES, DEAL_STATUSES, REVISIT_BUCKETS, labelOf } from "@/lib/constants";
+import { columnOf, tagIndex, PASSED_COLUMN_DAYS, type BoardCard, type BoardColumn } from "@/lib/board";
+import type { Deal, PipelineStage, Profile, SectorTag } from "@/types";
 import Column from "./Column";
 import DealTable from "./DealTable";
 
 const VIEW_KEY = "dealroom.boardView";
+const WATCHLIST_KEY = "dealroom.showWatchlist";
 
 export default function Board({
   cards: initial,
@@ -35,11 +36,14 @@ export default function Board({
 }) {
   const router = useRouter();
   const [cards, setCards] = useState(initial);
+  // Pick up fresh server data after router.refresh().
+  useEffect(() => setCards(initial), [initial]);
   const [sector, setSector] = useState("");
   const [owner, setOwner] = useState("");
   const [status, setStatus] = useState("");
   const [query, setQuery] = useState("");
-  const [showWatchlist, setShowWatchlist] = useState(false);
+  const [showWatchlist, setShowWatchlist] = useState(true);
+  const [passing, setPassing] = useState<BoardCard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<"board" | "table">("board");
 
@@ -47,8 +51,15 @@ export default function Board({
   useEffect(() => {
     try {
       if (localStorage.getItem(VIEW_KEY) === "table") setView("table");
+      if (localStorage.getItem(WATCHLIST_KEY) === "false") setShowWatchlist(false);
     } catch {}
   }, []);
+  function toggleWatchlist(v: boolean) {
+    setShowWatchlist(v);
+    try {
+      localStorage.setItem(WATCHLIST_KEY, String(v));
+    } catch {}
+  }
   function chooseView(v: "board" | "table") {
     setView(v);
     try {
@@ -65,7 +76,7 @@ export default function Board({
   const sectorSet = useMemo(() => (sector ? index.descendants(sector) : null), [sector, index]);
 
   const visible = cards.filter((c) => {
-    if (!showWatchlist && !isOnBoard(c.deal, today)) return false;
+    if (!showWatchlist && c.deal.end_state === "watchlist") return false;
     if (sectorSet && !c.tagIds.some((id) => sectorSet.has(id))) return false;
     if (owner && c.deal.owner !== owner) return false;
     if (status && c.deal.status !== status) return false;
@@ -78,32 +89,52 @@ export default function Board({
   });
 
   function handleDragEnd(e: DragEndEvent) {
-    const stage = e.over?.id as PipelineStage | undefined;
-    if (stage) moveDeal(String(e.active.id), stage);
+    const target = e.over?.id as BoardColumn | undefined;
+    if (!target) return;
+    const card = cards.find((c) => c.deal.id === String(e.active.id));
+    if (!card || columnOf(card.deal) === target && !card.revisitDue) return;
+    if (target === "passed") {
+      setPassing(card); // ask for a reason first
+    } else if (target === "watchlist") {
+      updateDeal(card, { end_state: "watchlist" });
+    } else {
+      moveDeal(card.deal.id, target);
+    }
   }
 
-  async function moveDeal(dealId: string, stage: PipelineStage) {
+  function moveDeal(dealId: string, stage: PipelineStage) {
     const card = cards.find((c) => c.deal.id === dealId);
     if (!card) return;
-    // Dropping a revisit-due or watchlist card into a column puts it back in the pipeline.
+    // Moving a passed, watchlisted or revisit-due deal into a stage puts it back in the pipeline.
     const reactivate = card.revisitDue || card.deal.end_state !== "none";
     if (card.deal.pipeline_stage === stage && !reactivate) return;
+    updateDeal(
+      card,
+      reactivate
+        ? { pipeline_stage: stage, end_state: "none", revisit_bucket: "none", revisit_date: null }
+        : { pipeline_stage: stage },
+    );
+  }
 
-    const patch = reactivate
-      ? { pipeline_stage: stage, end_state: "none" as const, revisit_bucket: "none" as const, revisit_date: null }
-      : { pipeline_stage: stage };
-
+  async function updateDeal(card: BoardCard, patch: Partial<Deal>) {
     const before = cards;
+    // Mirror the DB trigger so the card shows where it was rejected straight away.
+    const optimistic: Partial<Deal> =
+      patch.end_state === "passed" || patch.end_state === "lost"
+        ? { ...patch, rejected_at_stage: card.deal.pipeline_stage, closed_at: new Date().toISOString() }
+        : patch;
     setCards((cs) =>
       cs.map((c) =>
-        c.deal.id === dealId ? { ...c, deal: { ...c.deal, ...patch }, revisitDue: reactivate ? false : c.revisitDue } : c,
+        c.deal.id === card.deal.id
+          ? { ...c, deal: { ...c.deal, ...optimistic }, revisitDue: patch.end_state || patch.revisit_bucket ? false : c.revisitDue }
+          : c,
       ),
     );
     setError(null);
-    const { error } = await createClient().from("deals").update(patch).eq("id", dealId);
+    const { error } = await createClient().from("deals").update(patch).eq("id", card.deal.id);
     if (error) {
       setCards(before);
-      setError(`Couldn't move ${card.company.name}: ${error.message}`);
+      setError(`Couldn't update ${card.company.name}: ${error.message}`);
     } else {
       router.refresh();
     }
@@ -166,7 +197,7 @@ export default function Board({
           <input
             type="checkbox"
             checked={showWatchlist}
-            onChange={(e) => setShowWatchlist(e.target.checked)}
+            onChange={(e) => toggleWatchlist(e.target.checked)}
             className="accent-brand"
           />
           Show watchlist
@@ -185,19 +216,107 @@ export default function Board({
         <div className="flex-1 overflow-x-auto">
           <div className="flex gap-3 p-4 md:px-6 min-w-max h-full">
             {PIPELINE_STAGES.map((s) => (
+              <Fragment key={s.value}>
+                <Column
+                  id={s.value}
+                  label={s.label}
+                  cards={visible.filter((c) => columnOf(c.deal) === s.value)}
+                  ownerOf={ownerName}
+                  today={today}
+                />
+                {/* Passed sits right after Term sheet, before Invested */}
+                {s.value === "term_sheet" && (
+                  <Column
+                    id="passed"
+                    label="Passed"
+                    hint={`Last ${PASSED_COLUMN_DAYS} days`}
+                    quiet
+                    cards={visible.filter((c) => columnOf(c.deal) === "passed")}
+                    ownerOf={ownerName}
+                    today={today}
+                  />
+                )}
+              </Fragment>
+            ))}
+            {showWatchlist && (
               <Column
-                key={s.value}
-                stage={s.value}
-                label={s.label}
-                cards={visible.filter((c) => c.deal.pipeline_stage === s.value)}
+                id="watchlist"
+                label="Watchlist"
+                quiet
+                cards={visible.filter((c) => columnOf(c.deal) === "watchlist")}
                 ownerOf={ownerName}
                 today={today}
               />
-            ))}
+            )}
           </div>
         </div>
       </DndContext>
       )}
+
+      {passing && (
+        <PassDialog
+          card={passing}
+          onCancel={() => setPassing(null)}
+          onConfirm={(reason, bucket) => {
+            updateDeal(passing, { end_state: "passed", pass_reason: reason || null, revisit_bucket: bucket });
+            setPassing(null);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function PassDialog({
+  card,
+  onCancel,
+  onConfirm,
+}: {
+  card: BoardCard;
+  onCancel: () => void;
+  onConfirm: (reason: string, bucket: Deal["revisit_bucket"]) => void;
+}) {
+  const [reason, setReason] = useState(card.deal.pass_reason ?? "");
+  const [bucket, setBucket] = useState<Deal["revisit_bucket"]>("none");
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center p-4" onClick={onCancel}>
+      <div
+        role="dialog"
+        aria-labelledby="pass-title"
+        className="card w-full max-w-md p-5 space-y-3 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 id="pass-title" className="font-semibold">Pass on {card.company.name}</h2>
+        <p className="text-sm text-gray-500">
+          Rejected at <span className="font-medium text-black">{labelOf(PIPELINE_STAGES, card.deal.pipeline_stage)}</span>.
+        </p>
+        <textarea
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          placeholder="Why are we passing?"
+          rows={3}
+          autoFocus
+          className="input"
+        />
+        <div className="flex items-center gap-2">
+          <label htmlFor="pass-bucket" className="text-xs text-gray-500">Revisit</label>
+          <select
+            id="pass-bucket"
+            value={bucket}
+            onChange={(e) => setBucket(e.target.value as Deal["revisit_bucket"])}
+            className="input w-40"
+          >
+            {REVISIT_BUCKETS.map((b) => (
+              <option key={b.value} value={b.value}>{b.label}</option>
+            ))}
+          </select>
+        </div>
+        <div className="flex justify-end gap-2 pt-1">
+          <button className="btn-secondary" onClick={onCancel}>Cancel</button>
+          <button className="btn-primary" onClick={() => onConfirm(reason.trim(), bucket)}>Mark as passed</button>
+        </div>
+      </div>
     </div>
   );
 }

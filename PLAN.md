@@ -20,6 +20,7 @@ Status key: [x] done · [~] in progress · [ ] not started
 - [x] 10. End-to-end test on a local Supabase-style stack (GoTrue + PostgREST + Postgres) in Next and in the Workers runtime
 
 - [x] 11. Table view toggle on the pipeline page
+- [x] 12. Passed + Watchlist board columns; rejection tracking (stage at rejection, reason) on company page and weekly review. Needs migration 0002 run in Supabase
 
 ## Next (after you set it up)
 

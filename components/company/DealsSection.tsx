@@ -116,6 +116,9 @@ function DealEditor({ deal, profiles, today }: { deal: Deal; profiles: Profile[]
         {deal.end_state !== "none" && (
           <span className="px-1.5 py-0.5 rounded bg-gray-200 text-gray-700 text-[11px]">
             {labelOf(END_STATES, deal.end_state)}
+            {(deal.end_state === "passed" || deal.end_state === "lost") &&
+              ` at ${labelOf(PIPELINE_STAGES, deal.rejected_at_stage ?? deal.pipeline_stage)}`}
+            {(deal.end_state === "passed" || deal.end_state === "lost") && deal.closed_at && ` · ${formatDate(deal.closed_at)}`}
           </span>
         )}
         <AddedBy by={deal.created_by} at={deal.created_at} profiles={profiles} className="ml-auto" />
@@ -154,7 +157,7 @@ function DealEditor({ deal, profiles, today }: { deal: Deal; profiles: Profile[]
         <EditableField label="Revisit date" value={deal.revisit_date} kind="date" display={formatDate(deal.revisit_date)} onSave={save("revisit_date")} />
         <EditableField label="Owner" value={deal.owner ?? ""} kind="select" options={ownerOptions} onSave={save("owner")} />
         {(deal.end_state === "passed" || deal.end_state === "lost") && (
-          <EditableField label="Pass reason" value={deal.pass_reason} kind="textarea" onSave={save("pass_reason")} className="col-span-2 sm:col-span-4" />
+          <EditableField label={`Pass reason · rejected at ${labelOf(PIPELINE_STAGES, deal.rejected_at_stage ?? deal.pipeline_stage)}`} value={deal.pass_reason} kind="textarea" onSave={save("pass_reason")} className="col-span-2 sm:col-span-4" />
         )}
       </div>
 

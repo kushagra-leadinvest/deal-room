@@ -64,3 +64,12 @@ White background, black text, crimson accent `#9A1C1F`. (lp-portal's Tailwind co
 - Duplicate check runs on website blur (same normalisation as the DB) and again via the unique index on insert.
 - Quick add always creates a deal in New, plus optional sector path and introducer.
 - Board page has a Board / Table toggle (added 2026-10-24 at owner's request). Same filters apply to both; the table sorts by any column header and lets you change pipeline stage inline. The chosen view is remembered per browser (localStorage).
+
+## Passed / Watchlist columns and rejection tracking (2026-10-24, owner request)
+
+- Board columns: New → Term sheet, **Passed**, Invested, **Watchlist**. Passed and Watchlist are muted (dashed column, grey cards) unless a card has a revisit due.
+- Passed column shows deals passed in the last 90 days (`PASSED_COLUMN_DAYS`), plus any older passed deal with a revisit due. Lost deals have no column; they come back in their stage column only when a revisit is due.
+- The "Show watchlist" toggle now shows/hides the Watchlist column (default on, remembered per browser).
+- Dragging into Passed opens a dialog for the pass reason and optional revisit bucket. Dragging into Watchlist sets end_state watchlist. Dragging out of either into a stage reactivates the deal.
+- `deals.rejected_at_stage` and `deals.closed_at` are set by a DB trigger when end_state becomes passed or lost (migration 0002), so every path (board, company page, SQL) records them. They stay on the deal if it is reactivated and are overwritten if it is passed again.
+- Weekly review "Recent passes": passed/lost in the last 30 days with stage at rejection, reason, date, owner, plus a one-line count by stage. Text only, no charts.

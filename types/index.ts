@@ -50,6 +50,8 @@ export interface Deal {
   next_action: string | null;
   next_action_date: string | null;
   next_action_task_id: string | null;
+  rejected_at_stage: PipelineStage | null;
+  closed_at: string | null;
   created_by: string | null;
   created_at: string;
 }

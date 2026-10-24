@@ -15,7 +15,7 @@ Internal deal flow tracker for Lead Invest (2 users). Read PLAN.md for status an
 - `app/` — routes: `/login`, `/` pipeline (board + table views), `/company/[id]`, `/review`, `/tasks`, `/add`, `api/extract`, `api/drive/upload`
 - `lib/supabase/` — browser and server clients (adapted from lp-portal)
 - `lib/format.ts`, `lib/constants.ts` — formatting helpers and enums/labels
-- `supabase/migrations/` — schema, RLS, triggers. `supabase/seed.sql` — dummy data
+- `supabase/migrations/` — schema, RLS, triggers; numbered files, run in order (owner pastes each new one into the Supabase SQL editor). `supabase/seed.sql` — dummy data
 - `middleware.ts` — redirects signed-out users to `/login`
 
 ## Commands

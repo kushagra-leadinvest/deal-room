@@ -1,6 +1,6 @@
 import Board from "@/components/board/Board";
-import { buildCards, isOnBoard } from "@/lib/board";
-import { today } from "@/lib/format";
+import { buildCards, isOnPipelinePage, PASSED_COLUMN_DAYS } from "@/lib/board";
+import { daysFromToday, today } from "@/lib/format";
 import { getSessionContext } from "@/lib/queries";
 import type { Company, Deal, SectorTag } from "@/types";
 
@@ -35,7 +35,7 @@ export default async function BoardPage() {
 
   return (
     <Board
-      cards={cards.filter((c) => isOnBoard(c.deal, t) || c.deal.end_state === "watchlist")}
+      cards={cards.filter((c) => isOnPipelinePage(c.deal, t, daysFromToday(-PASSED_COLUMN_DAYS)))}
       tags={(tags.data ?? []) as SectorTag[]}
       profiles={profiles}
       userId={userId}
