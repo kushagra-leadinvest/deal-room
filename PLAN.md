@@ -15,8 +15,15 @@ Status key: [x] done · [~] in progress · [ ] not started
 - [x] 5. `/company/[id]`: summary card, deals, notes timeline + paste transcript, decks, our take, people, tasks
 - [x] 6. `/api/extract` (Gemini) and `/api/drive/upload` (Drive), both with non-blocking fallbacks
 - [x] 7. `/review`, `/tasks`, `/add`
-- [~] 8. Cloudflare deploy config (OpenNext on Workers) + full build check
-- [ ] 9. Manual setup handoff: Supabase project, 2 users, env vars, Google OAuth token
+- [x] 8. Cloudflare deploy config (OpenNext on Workers) + full build check
+- [x] 9. Manual setup handoff: SETUP.md
+- [x] 10. End-to-end test on a local Supabase-style stack (GoTrue + PostgREST + Postgres) in Next and in the Workers runtime
+
+## Next (after you set it up)
+
+- [ ] Owner runs SETUP.md: Supabase project, 2 users, Cloudflare deploy
+- [ ] Optional: Gemini key, Drive OAuth token
+- [ ] Untested until a real key exists: Gemini success path (failure path is tested)
 
 ## Out of scope
 

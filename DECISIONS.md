@@ -12,7 +12,8 @@ Last updated: 2026-10-24
 | Hosting | Cloudflare Workers via `@opennextjs/cloudflare` | `@cloudflare/next-on-pages` is deprecated; Pages would force every route onto the edge runtime. Same Cloudflare dashboard and free tier |
 | Drag and drop | `@dnd-kit/core` | Small, accessible, works with React 19 |
 | AI | Gemini REST API via `fetch` | Free tier; no SDK so it runs on Workers |
-| Decks | Google Drive REST API via `fetch` | One shared Google account's OAuth refresh token in env; service accounts have no My Drive quota |
+| Decks | Google Drive REST API via `fetch` | One shared Google account's OAuth refresh token in env; service accounts have no My Drive quota. Scope `drive` (not `drive.file`) so uploads can target an existing folder |
+| Deploy target | Cloudflare, confirmed by owner 2026-10-24 | Free tier has no commercial-use limit (Vercel Hobby does) |
 
 ## Data model
 

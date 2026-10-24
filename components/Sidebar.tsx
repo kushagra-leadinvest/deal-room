@@ -90,7 +90,7 @@ export default function AppShell({
       {/* Logo */}
       <div className="px-5 py-5 border-b border-gray-100">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.png" alt="Lead Invest" className="h-9 w-auto" />
+        <img src="/logo.png" alt="Lead Invest" className="h-10 w-auto" />
         <p className="mt-2 text-[10px] font-semibold tracking-widest text-gray-400 uppercase">Deal Room</p>
       </div>
 

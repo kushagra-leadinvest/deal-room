@@ -21,7 +21,7 @@ export default function DealCard({
 
   const style = transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` } : undefined;
   const nextOverdue = !!deal.next_action_date && deal.next_action_date < today;
-  const dimmed = deal.status !== "active" || deal.end_state !== "none";
+  const dimmed = !revisitDue && (deal.status !== "active" || deal.end_state !== "none");
   const flagged = revisitDue || overdueTasks > 0;
 
   return (

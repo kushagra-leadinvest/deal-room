@@ -20,9 +20,18 @@ Internal deal flow tracker for Lead Invest (2 users). Read PLAN.md for status an
 
 ## Commands
 
-- `npm run dev` · `npm run build` · `npm run lint`
+- `npm run dev` · `npm run build` · `npm run typecheck`
 - `npm run preview` / `npm run deploy` — OpenNext Cloudflare build
 
 ## Env vars
 
-See `.env.local.example`.
+See `.env.local.example` and SETUP.md. `NEXT_PUBLIC_*` are inlined at build time (Cloudflare build variables); the rest are Worker runtime secrets.
+
+## Testing without a Supabase project
+
+`scripts/local-stack/README.md` describes the GoTrue + PostgREST + Postgres setup used for end-to-end tests with Playwright.
+
+## Conventions
+
+- Pages are server components that load data; client components write with the browser Supabase client via `lib/useMutation.ts`, then `router.refresh()`.
+- Business rules for the board and review live in `lib/board.ts`; DB-side rules (last_touched, revisit dates, sector levels) live in triggers.
