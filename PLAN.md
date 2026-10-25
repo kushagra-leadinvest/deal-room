@@ -28,6 +28,7 @@ Status key: [x] done · [~] in progress · [ ] not started
 - [ ] Add Tanisha's account
 - [ ] Optional: Gemini key, Drive OAuth token
 - [ ] Untested until a real key exists: Gemini success path (failure path is tested)
+- [ ] Import live pipeline from the "Deal Room import" sheet: one-time SQL generated and tested (kept outside git, real data), owner to run it in the SQL editor
 
 ## Out of scope
 
