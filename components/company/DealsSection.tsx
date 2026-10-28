@@ -9,6 +9,7 @@ import ErrorText from "@/components/ui/ErrorText";
 import { useMutation } from "@/lib/useMutation";
 import {
   PIPELINE_STAGES, DEAL_STATUSES, END_STATES, REVISIT_BUCKETS, labelOf,
+  NEXT_ACTIONS,
 } from "@/lib/constants";
 import { daysFromToday, formatDate, short } from "@/lib/format";
 import { isRevisitDue } from "@/lib/board";
@@ -185,7 +186,7 @@ function DealEditor({ deal, profiles, today }: { deal: Deal; profiles: Profile[]
       )}
 
       <div className="mt-3 pt-3 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-[1fr_10rem_auto] gap-3 items-end">
-        <EditableField label="Next action" value={deal.next_action} onSave={save("next_action")} />
+        <EditableField label="Next action" value={deal.next_action} suggestions={NEXT_ACTIONS} onSave={save("next_action")} />
         <EditableField
           label="Due"
           value={deal.next_action_date}

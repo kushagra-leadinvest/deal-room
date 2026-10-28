@@ -45,3 +45,22 @@ export const STALLED_DAYS = 14;
 export function labelOf(list: readonly { value: string; label: string }[], value: string | null | undefined) {
   return list.find((x) => x.value === value)?.label ?? value ?? "—";
 }
+
+/** Suggested next actions on a deal; any other text can still be typed */
+export const NEXT_ACTIONS = [
+  "Intro call",
+  "Follow-up call",
+  "Founder meeting",
+  "Request deck",
+  "Request data room / financials",
+  "Market research",
+  "Customer reference calls",
+  "Network / expert call",
+  "Share internally",
+  "Prepare IC memo",
+  "Present at IC",
+  "Due diligence",
+  "Send term sheet",
+  "Close documentation",
+  "Share decision with founder",
+] as const;

@@ -15,6 +15,7 @@ export default function EditableField({
   options,
   placeholder = "Add",
   display,
+  suggestions,
   onSave,
   className = "",
 }: {
@@ -24,6 +25,8 @@ export default function EditableField({
   options?: readonly { value: string; label: string }[];
   placeholder?: string;
   display?: React.ReactNode;
+  /** Text fields only: a dropdown of common values, still free to type anything */
+  suggestions?: readonly string[];
   onSave: (value: string | number | string[] | null) => Promise<boolean | void>;
   className?: string;
 }) {
@@ -55,14 +58,15 @@ export default function EditableField({
     return t;
   }
 
-  async function commit() {
+  async function commit(text = draft) {
     if (saving) return;
-    if (draft === toText(value)) {
+    if (text === toText(value)) {
       setEditing(false);
       return;
     }
+    setDraft(text);
     setSaving(true);
-    const ok = await onSave(parse(draft));
+    const ok = await onSave(parse(text));
     setSaving(false);
     if (ok !== false) setEditing(false);
   }
@@ -76,6 +80,15 @@ export default function EditableField({
       commit();
     }
   }
+
+  // Show every suggestion until the user starts typing, then filter by what they typed
+  const q = draft.trim().toLowerCase();
+  const matches =
+    suggestions && kind === "text"
+      ? draft === toText(value) || !q
+        ? suggestions
+        : suggestions.filter((s) => s.toLowerCase().includes(q))
+      : [];
 
   const empty = toText(value) === "";
   const shown =
@@ -91,7 +104,7 @@ export default function EditableField({
             ref={ref}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            onBlur={commit}
+            onBlur={() => commit()}
             onKeyDown={onKeyDown}
             rows={4}
             disabled={saving}
@@ -102,7 +115,7 @@ export default function EditableField({
             ref={ref}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            onBlur={commit}
+            onBlur={() => commit()}
             onKeyDown={onKeyDown}
             disabled={saving}
             className="input"
@@ -114,18 +127,39 @@ export default function EditableField({
             ))}
           </select>
         ) : (
+          <div className="relative">
           <input
             ref={ref}
             type={kind === "date" ? "date" : kind === "url" ? "url" : "text"}
             inputMode={kind === "number" ? "decimal" : undefined}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            onBlur={commit}
+            onBlur={() => commit()}
             onKeyDown={onKeyDown}
             disabled={saving}
-            placeholder={kind === "list" ? "Comma separated" : undefined}
+            placeholder={kind === "list" ? "Comma separated" : matches.length ? "Pick or type" : undefined}
             className="input"
           />
+          {matches.length > 0 && !saving && (
+            <ul className="absolute z-20 left-0 right-0 mt-1 max-h-60 overflow-auto rounded-md border border-gray-200 bg-white shadow-lg py-1 text-sm">
+              {matches.map((s) => (
+                <li key={s}>
+                  <button
+                    type="button"
+                    // mousedown, not click: keeps the input from blurring and saving the half-typed text first
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      commit(s);
+                    }}
+                    className={`w-full text-left px-3 py-1.5 hover:bg-brand-light hover:text-brand ${s === draft ? "font-medium" : ""}`}
+                  >
+                    {s}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          </div>
         )
       ) : (
         <button

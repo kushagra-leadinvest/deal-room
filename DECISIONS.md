@@ -73,3 +73,7 @@ White background, black text, crimson accent `#9A1C1F`. (lp-portal's Tailwind co
 - Dragging into Passed opens a dialog for the pass reason and optional revisit bucket. Dragging into Watchlist sets end_state watchlist. Dragging out of either into a stage reactivates the deal.
 - `deals.rejected_at_stage` and `deals.closed_at` are set by a DB trigger when end_state becomes passed or lost (migration 0002), so every path (board, company page, SQL) records them. They stay on the deal if it is reactivated and are overwritten if it is passed again.
 - Weekly review "Recent passes": passed/lost in the last 30 days with stage at rejection, reason, date, owner, plus a one-line count by stage. Text only, no charts.
+
+## Next action suggestions (2026-10-28)
+
+- Next action on a deal opens a dropdown of common steps (`NEXT_ACTIONS` in lib/constants.ts) but stays free text, so anything can still be typed. The list shows in full until you type, then filters. Edit the constant to change the options.
