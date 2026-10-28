@@ -64,7 +64,7 @@ export default function SummaryCard({ company, profiles }: { company: Company; p
         />
         <EditableField label="Revenue" value={company.revenue_metrics} kind="textarea" onSave={save("revenue_metrics")} />
         <EditableField label="Traction" value={company.traction_metrics} kind="textarea" onSave={save("traction_metrics")} />
-        <EditableField label="Raise ask" value={company.raise_ask} onSave={save("raise_ask")} />
+        <EditableField label="Raise ask" value={company.raise_ask} kind="textarea" onSave={save("raise_ask")} className="sm:col-span-2" />
       </div>
       <ErrorText error={error} />
     </Section>

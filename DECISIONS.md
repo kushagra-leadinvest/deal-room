@@ -78,3 +78,4 @@ White background, black text, crimson accent `#9A1C1F`. (lp-portal's Tailwind co
 
 - Next action on a deal opens a dropdown of common steps (`NEXT_ACTIONS` in lib/constants.ts) but stays free text, so anything can still be typed. The list shows in full until you type, then filters. Edit the constant to change the options.
 - Board cards show the next action in crimson always (owner's request). Overdue is marked separately: the date turns bold red with "· overdue".
+- Long text fields (what they do, revenue, traction, raise ask, thesis notes) render light structure: "- " lines become bullets, a short line ending in ":" becomes a small heading. Plain text still works as before.

@@ -93,7 +93,11 @@ export default function EditableField({
   const empty = toText(value) === "";
   const shown =
     display ??
-    (kind === "select" ? options?.find((o) => o.value === value)?.label : toText(value));
+    (kind === "select"
+      ? options?.find((o) => o.value === value)?.label
+      : kind === "textarea"
+        ? <LongText text={toText(value)} />
+        : toText(value));
 
   return (
     <div className={`min-w-0 ${className}`}>
@@ -166,7 +170,7 @@ export default function EditableField({
           type="button"
           onClick={() => setEditing(true)}
           className={`w-full text-left text-sm rounded-md px-1 -mx-1 py-0.5 hover:bg-gray-50 [overflow-wrap:anywhere] ${
-            kind === "textarea" ? "whitespace-pre-wrap" : ""
+            kind === "textarea" ? "leading-relaxed" : ""
           } ${empty ? "text-gray-400 italic" : "text-black"}`}
         >
           {empty ? placeholder : shown}
@@ -174,4 +178,44 @@ export default function EditableField({
       )}
     </div>
   );
+}
+
+/**
+ * Long text with light structure: lines starting with "- " or "• " become bullets,
+ * a short line ending in ":" becomes a small heading, blank lines add space.
+ */
+function LongText({ text }: { text: string }) {
+  const blocks: React.ReactNode[] = [];
+  let bullets: string[] = [];
+  const flush = () => {
+    if (bullets.length) {
+      blocks.push(
+        <ul key={blocks.length} className="list-disc pl-4 space-y-1 marker:text-gray-400">
+          {bullets.map((b, i) => <li key={i}>{b}</li>)}
+        </ul>,
+      );
+      bullets = [];
+    }
+  };
+  for (const raw of text.split("\n")) {
+    const line = raw.trim();
+    const bullet = line.match(/^[-•]\s+(.*)$/);
+    if (bullet) {
+      bullets.push(bullet[1]);
+      continue;
+    }
+    flush();
+    if (!line) continue;
+    if (line.endsWith(":") && line.length <= 40) {
+      blocks.push(
+        <p key={blocks.length} className="text-[11px] font-semibold uppercase tracking-wide text-gray-500 pt-1">
+          {line.slice(0, -1)}
+        </p>,
+      );
+    } else {
+      blocks.push(<p key={blocks.length}>{line}</p>);
+    }
+  }
+  flush();
+  return <div className="space-y-1.5">{blocks}</div>;
 }
