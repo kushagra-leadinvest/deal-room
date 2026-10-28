@@ -87,11 +87,11 @@ export default function DealCard({
       </div>
 
       {!quiet && (
-      <dl className="mt-2 space-y-0.5 text-xs text-gray-600">
+      <dl className="mt-2 space-y-0.5 text-xs text-gray-800">
         {(company.last_round_stage || company.last_round_size) && (
           <div>
-            <dt className="inline text-gray-400">Last round </dt>
-            <dd className="inline">
+            <dt className="inline text-gray-500">Last round </dt>
+            <dd className="inline font-semibold">
               {company.last_round_stage ?? "—"}
               {company.last_round_size ? ` · ${short(company.last_round_size)}` : ""}
             </dd>
@@ -99,8 +99,8 @@ export default function DealCard({
         )}
         {company.existing_investors.length > 0 && (
           <div className="truncate" title={company.existing_investors.join(", ")}>
-            <dt className="inline text-gray-400">Investors </dt>
-            <dd className="inline">{company.existing_investors.join(", ")}</dd>
+            <dt className="inline text-gray-500">Investors </dt>
+            <dd className="inline font-semibold">{company.existing_investors.join(", ")}</dd>
           </div>
         )}
       </dl>
