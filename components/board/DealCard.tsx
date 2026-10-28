@@ -115,11 +115,16 @@ export default function DealCard({
           {deal.pass_reason && <p className="mt-0.5 line-clamp-2 italic">{deal.pass_reason}</p>}
         </div>
       ) : (
-        <div className={`mt-2 pt-2 border-t border-gray-100 text-xs ${nextOverdue && !quiet ? "text-red-700" : quiet ? "text-gray-500" : "text-gray-700"}`}>
+        <div className={`mt-2 pt-2 border-t border-gray-100 text-xs ${quiet ? "text-gray-500" : "text-brand"}`}>
           {deal.next_action ? (
             <>
               <span className="font-medium">Next:</span> {deal.next_action}
-              {deal.next_action_date && <span className="whitespace-nowrap"> · {shortDate(deal.next_action_date)}</span>}
+              {deal.next_action_date && (
+                <span className={`whitespace-nowrap ${nextOverdue && !quiet ? "font-semibold text-red-700" : ""}`}>
+                  {" "}· {shortDate(deal.next_action_date)}
+                  {nextOverdue && !quiet && " · overdue"}
+                </span>
+              )}
             </>
           ) : (
             <span className="text-gray-400 italic">No next action</span>

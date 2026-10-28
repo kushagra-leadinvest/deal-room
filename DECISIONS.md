@@ -77,3 +77,4 @@ White background, black text, crimson accent `#9A1C1F`. (lp-portal's Tailwind co
 ## Next action suggestions (2026-10-28)
 
 - Next action on a deal opens a dropdown of common steps (`NEXT_ACTIONS` in lib/constants.ts) but stays free text, so anything can still be typed. The list shows in full until you type, then filters. Edit the constant to change the options.
+- Board cards show the next action in crimson always (owner's request). Overdue is marked separately: the date turns bold red with "· overdue".
