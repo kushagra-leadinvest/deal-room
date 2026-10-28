@@ -26,7 +26,7 @@ export default function SummaryCard({ company, profiles }: { company: Company; p
       />
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-3">
         <EditableField label="Name" value={company.name} onSave={(v) => (v ? save("name")(v) : Promise.resolve(false))} />
-        <EditableField label="Website" value={company.website} kind="url" onSave={(v) => (v ? save("website")(v) : Promise.resolve(false))} />
+        <EditableField label="Website" value={company.website} kind="url" display={company.website.replace(/^[a-z]+:\/\//i, "").replace(/^www\./i, "").replace(/\/$/, "")} onSave={(v) => (v ? save("website")(v) : Promise.resolve(false))} />
         <EditableField label="Stage" value={company.stage ?? ""} kind="select" options={STAGE_OPTIONS} onSave={(v) => save("stage")(v || null)} />
         <EditableField label="Location" value={company.location} onSave={save("location")} />
         <EditableField label="Last round" value={company.last_round_stage} placeholder="e.g. Seed" onSave={save("last_round_stage")} />

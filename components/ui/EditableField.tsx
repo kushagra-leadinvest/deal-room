@@ -96,7 +96,7 @@ export default function EditableField({
     (kind === "select" ? options?.find((o) => o.value === value)?.label : toText(value));
 
   return (
-    <div className={className}>
+    <div className={`min-w-0 ${className}`}>
       {label && <span className="label">{label}</span>}
       {editing ? (
         kind === "textarea" ? (
@@ -165,7 +165,7 @@ export default function EditableField({
         <button
           type="button"
           onClick={() => setEditing(true)}
-          className={`w-full text-left text-sm rounded-md px-1 -mx-1 py-0.5 hover:bg-gray-50 ${
+          className={`w-full text-left text-sm rounded-md px-1 -mx-1 py-0.5 hover:bg-gray-50 [overflow-wrap:anywhere] ${
             kind === "textarea" ? "whitespace-pre-wrap" : ""
           } ${empty ? "text-gray-400 italic" : "text-black"}`}
         >
